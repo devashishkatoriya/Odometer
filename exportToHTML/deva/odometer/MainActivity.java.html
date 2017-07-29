@@ -1,0 +1,95 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,255); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+MainActivity.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">deva.odometer; 
+ 
+</span><span class="s0">import </span><span class="s1">android.content.ComponentName; 
+</span><span class="s0">import </span><span class="s1">android.content.Context; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.content.ServiceConnection; 
+</span><span class="s0">import </span><span class="s1">android.os.Handler; 
+</span><span class="s0">import </span><span class="s1">android.os.IBinder; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.AppCompatActivity; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.widget.TextView; 
+ 
+</span><span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity { 
+    </span><span class="s0">double </span><span class="s1">distance; 
+    </span><span class="s0">private <a href="OdometerService.java.html">OdometerService</a> </span><span class="s1">odometer; 
+    </span><span class="s0">private boolean </span><span class="s1">bound = </span><span class="s0">false</span><span class="s1">; 
+ 
+    </span><span class="s0">private </span><span class="s1">ServiceConnection connection = </span><span class="s0">new </span><span class="s1">ServiceConnection() { 
+        @Override 
+        </span><span class="s0">public void </span><span class="s1">onServiceConnected(ComponentName name, IBinder service) { 
+            <a href="OdometerService.java.html">OdometerService.OdometerBinder</a> odometerBinder = (<a href="OdometerService.java.html">OdometerService.OdometerBinder</a>) service; 
+            odometer = odometerBinder.getOdometer(); 
+            bound = </span><span class="s0">true</span><span class="s1">; 
+        } 
+ 
+        @Override 
+        </span><span class="s0">public void </span><span class="s1">onServiceDisconnected(ComponentName name) { 
+            bound = </span><span class="s0">false</span><span class="s1">; 
+        } 
+    }; 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_main); 
+        watchMileage(); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onStart() { 
+        </span><span class="s0">super</span><span class="s1">.onStart(); 
+        Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, <a href="OdometerService.java.html">OdometerService</a>.</span><span class="s0">class</span><span class="s1">); 
+        bindService(intent,connection, Context.BIND_AUTO_CREATE); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onStop() { 
+        </span><span class="s0">super</span><span class="s1">.onStop(); 
+        </span><span class="s0">if </span><span class="s1">(bound) 
+        { 
+            unbindService(connection); 
+            bound = </span><span class="s0">false</span><span class="s1">; 
+        } 
+    } 
+    </span><span class="s0">private void </span><span class="s1">watchMileage() 
+    { 
+        </span><span class="s0">final </span><span class="s1">TextView distanceView = (TextView)findViewById(R.id.textView); 
+        </span><span class="s0">final </span><span class="s1">Handler handler = </span><span class="s0">new </span><span class="s1">Handler(); 
+        handler.post(</span><span class="s0">new </span><span class="s1">Runnable() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">run() { 
+                distance = </span><span class="s2">0.0</span><span class="s1">; 
+                </span><span class="s0">if</span><span class="s1">(odometer!=</span><span class="s0">null</span><span class="s1">) 
+                { 
+                    distance = odometer.getKms(); 
+                } 
+                String distanceStr = String.format(</span><span class="s3">&quot;%1$,.2f kms&quot;</span><span class="s1">,distance); 
+                distanceView.setText(distanceStr); 
+                handler.postDelayed(</span><span class="s0">this</span><span class="s1">,</span><span class="s2">1000</span><span class="s1">); 
+            } 
+        }); 
+    } 
+} 
+</span></pre>
+</body>
+</html>

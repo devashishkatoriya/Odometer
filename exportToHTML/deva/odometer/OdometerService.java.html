@@ -1,0 +1,102 @@
+<html>
+<head>
+<title>OdometerService.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+OdometerService.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">deva.odometer; 
+ 
+</span><span class="s0">import </span><span class="s1">android.Manifest; 
+</span><span class="s0">import </span><span class="s1">android.app.Service; 
+</span><span class="s0">import </span><span class="s1">android.content.Context; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.content.pm.PackageManager; 
+</span><span class="s0">import </span><span class="s1">android.location.Location; 
+</span><span class="s0">import </span><span class="s1">android.location.LocationListener; 
+</span><span class="s0">import </span><span class="s1">android.location.LocationManager; 
+</span><span class="s0">import </span><span class="s1">android.os.Binder; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.os.IBinder; 
+</span><span class="s0">import </span><span class="s1">android.support.v4.app.ActivityCompat; 
+ 
+</span><span class="s0">public class </span><span class="s1">OdometerService </span><span class="s0">extends </span><span class="s1">Service { 
+ 
+    </span><span class="s0">private final </span><span class="s1">IBinder binder = </span><span class="s0">new </span><span class="s1">OdometerBinder(); 
+    </span><span class="s0">private static double </span><span class="s1">distanceInMeters; 
+    </span><span class="s0">private static </span><span class="s1">Location lastLocation = </span><span class="s0">null</span><span class="s1">; 
+ 
+    </span><span class="s0">public class </span><span class="s1">OdometerBinder </span><span class="s0">extends </span><span class="s1">Binder { 
+        OdometerService getOdometer() { 
+            </span><span class="s0">return </span><span class="s1">OdometerService.</span><span class="s0">this</span><span class="s1">; 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onCreate() { 
+ 
+        LocationListener listener = </span><span class="s0">new </span><span class="s1">LocationListener() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onLocationChanged(Location location) { 
+                </span><span class="s0">if </span><span class="s1">(lastLocation == </span><span class="s0">null</span><span class="s1">) { 
+                    lastLocation = location; 
+                } 
+                distanceInMeters += location.distanceTo(lastLocation); 
+                lastLocation = location; 
+            } 
+ 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onStatusChanged(String provider, </span><span class="s0">int </span><span class="s1">status, Bundle extras) { 
+ 
+            } 
+ 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onProviderEnabled(String provider) { 
+ 
+            } 
+ 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onProviderDisabled(String provider) { 
+ 
+            } 
+        }; 
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE); 
+        </span><span class="s0">if </span><span class="s1">(ActivityCompat.checkSelfPermission(</span><span class="s0">this</span><span class="s1">, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &amp;&amp; ActivityCompat.checkSelfPermission(</span><span class="s0">this</span><span class="s1">, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { 
+            </span><span class="s2">// TODO: Consider calling</span><span class="s1"> 
+            </span><span class="s2">//    ActivityCompat#requestPermissions</span><span class="s1"> 
+            </span><span class="s2">// here to request the missing permissions, and then overriding</span><span class="s1"> 
+            </span><span class="s2">//   public void onRequestPermissionsResult(int requestCode, String[] permissions,</span><span class="s1"> 
+            </span><span class="s2">//                                          int[] grantResults)</span><span class="s1"> 
+            </span><span class="s2">// to handle the case where the user grants the permission. See the documentation</span><span class="s1"> 
+            </span><span class="s2">// for ActivityCompat#requestPermissions for more details.</span><span class="s1"> 
+            </span><span class="s0">return</span><span class="s1">; 
+        } 
+ 
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, </span><span class="s3">1000</span><span class="s1">, </span><span class="s3">1</span><span class="s1">, listener); 
+    } 
+ 
+    </span><span class="s0">public double </span><span class="s1">getKms() 
+    { 
+        </span><span class="s0">return this</span><span class="s1">.distanceInMeters/</span><span class="s3">1000</span><span class="s1">; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public </span><span class="s1">IBinder onBind(Intent intent) { 
+        </span><span class="s0">return </span><span class="s1">binder; 
+    } 
+} 
+</span></pre>
+</body>
+</html>
